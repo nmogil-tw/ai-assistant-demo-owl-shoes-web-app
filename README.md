@@ -5,6 +5,30 @@
 
 A modular tool for deploying a Twilio AI Assistant with pre-configured tools and knowledge bases. This project provides a structured way to create and configure an AI Assistant for retail customer service.
 
+## Table of Contents
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Project Structure](#project-structure)
+- [Part 1: Deploying the AI Assistant](#part-1-deploying-the-ai-assistant)
+  - [Quick Start](#quick-start)
+  - [Connecting Channels](#connecting-channels)
+    - [Voice Channel](#voice-channel)
+    - [Messaging Channels](#messaging-channels)
+    - [Conversations Channel](#conversations-channel)
+  - [Tool Functions](#tool-functions)
+  - [Development](#development)
+    - [Adding New Tools](#adding-new-tools)
+    - [Modifying Assistant Behavior](#modifying-assistant-behavior)
+    - [Local Development](#local-development)
+- [Part 2: Deploying the Web App](#part-2-deploying-the-web-app)
+  - [Technical Stack](#technical-stack)
+  - [Web App Setup](#web-app-setup)
+  - [Features](#features-1)
+  - [Development](#development-1)
+  - [Error Handling](#error-handling)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Features
 
 - Automated assistant creation with retail-focused personality
@@ -16,6 +40,12 @@ A modular tool for deploying a Twilio AI Assistant with pre-configured tools and
   - Customer surveys
 - Knowledge base integration for FAQs
 - Modular and maintainable codebase
+- Optional front-end integration for demo purposes
+- Optional Segment integration for analytics
+- Optional Chat Service integration for messaging
+- Optional Voice Intel integration for voice calls
+- Optional Flex integration for voice calls
+- Optional Studio integration for voice calls
 
 ## Prerequisites
 
@@ -27,7 +57,7 @@ A modular tool for deploying a Twilio AI Assistant with pre-configured tools and
 ## Project Structure
 
 ```
-twilio-ai-assistant/
+twilio-ai-assistant-demo-owl-shoes-web-app/
 ├── README.md                                # Project documentation and setup instructions
 ├── LICENSE                                  # MIT license file
 ├── package.json                             # Project dependencies and scripts
@@ -57,17 +87,45 @@ twilio-ai-assistant/
 │       └── send-to-flex.js                  # Flex transfer handler
 ├── prompts/                                 # Assistant configuration
 │   └── assistant-prompt.md                  # Core personality and behavior
-└── src/                                     # Deployment and configuration
-    ├── deploy.js                            # Main deployment script
-    ├── config/                              # Configuration modules
-    │   ├── assistant.js                     # Assistant settings
-    │   ├── knowledge.js                     # Knowledge base config
-    │   └── tools.js                         # Tool configurations
-    └── lib/                                 # Core functionality
-        ├── createAssistant.js               # Assistant creation
-        ├── createKnowledge.js               # Knowledge base setup
-        └── createTools.js                   # Tool creation and attachment
+├── src/                                     # Deployment and configuration
+│   ├── deploy.js                            # Main deployment script
+│   ├── config/                              # Configuration modules
+│   │   ├── assistant.js                     # Assistant settings
+│   │   ├── knowledge.js                     # Knowledge base config
+│   │   └── tools.js                         # Tool configurations
+│   └── lib/                                 # Core functionality
+│       ├── createAssistant.js               # Assistant creation
+│       ├── createKnowledge.js               # Knowledge base setup
+│       └── createTools.js                   # Tool creation and attachment
+└── web/                                     # Demo Web Application
+    ├── README.md                            # Web app documentation
+    ├── package.json                         # Web app dependencies and scripts
+    ├── vite.config.ts                       # Vite configuration
+    ├── tsconfig.json                        # TypeScript configuration
+    ├── tailwind.config.ts                   # Tailwind CSS configuration
+    ├── public/                              # Static assets
+    └── src/                                 # Web app source code
+        ├── App.tsx                          # Main application component
+        ├── index.css                        # Global styles
+        ├── components/                       # React components
+        │   ├── ui/                          # UI components (shadcn/ui)
+        │   ├── Navigation.tsx               # Navigation component
+        │   └── checkout/                    # Checkout components
+        ├── hooks/                           # Custom React hooks
+        ├── integrations/                    # Service integrations
+        │   ├── airtable/                    # Airtable client and types
+        │   └── twilio/                      # Twilio client
+        ├── lib/                             # Utility functions
+        ├── pages/                           # Page components
+        │   ├── Cart.tsx                     # Shopping cart page
+        │   ├── Checkout.tsx                 # Checkout page
+        │   ├── Contact.tsx                  # Contact page with chat
+        │   ├── Index.tsx                    # Home page
+        │   └── ProductDetails.tsx           # Product details page
+        └── types/                           # TypeScript type definitions
 ```
+
+# Part 1: Deploying the AI Assistant
 
 ## Quick Start
 
@@ -320,6 +378,65 @@ npm run deploy
 1. Create test credentials in Twilio
 2. Use test credentials in `.env`
 3. Deploy functions and assistant separately for easier debugging
+
+# Part 2: Deploying the Web App
+
+## Technical Stack
+
+- React 18 with TypeScript
+- Vite for build tooling
+- Tailwind CSS for styling
+- shadcn/ui for UI components
+- TanStack Query for data fetching
+- React Router for navigation
+
+## Web App Setup
+
+> **Important**: Complete the AI Assistant setup first, as the web application requires the same environment variables and services to be configured.
+
+1. Navigate to the web directory:
+```bash
+cd web
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Copy the environment variables from the root `.env` file:
+```bash
+cp ../.env .env
+```
+
+4. Start the development server:
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:8080`.
+
+## Features
+
+- Product catalog browsing
+- Shopping cart functionality
+- Customer service chat integration
+- Order management
+- Customer account management
+
+## Development
+
+To work on the web application:
+
+1. Ensure all services (Twilio, Airtable) are properly configured
+2. Run the development server with `npm run dev`
+3. Make changes to components in `web/src/components`
+4. Create new pages in `web/src/pages`
+
+To build for production:
+```bash
+npm run build
+```
 
 ## Error Handling
 
