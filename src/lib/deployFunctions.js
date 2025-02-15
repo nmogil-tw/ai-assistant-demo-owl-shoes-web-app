@@ -47,7 +47,7 @@ async function deployFunctions(serverlessClient) {
 
   const result = await serverlessClient.deployLocalProject({
     cwd: process.cwd(),
-    serviceName: 'ai-assistant-retail-owl-shoes',
+    serviceName: 'ai-assistant-retail-owl-shoes-v2',
     functionsEnv: 'dev',
     env: await getEnvironmentVariables(),
     uiEditable: true,
