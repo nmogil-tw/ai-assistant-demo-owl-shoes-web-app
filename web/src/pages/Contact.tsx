@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { twilioApi } from "@/integrations/twilio";
 
 const TWILIO_ASSISTANT_SID = import.meta.env.VITE_TWILIO_ASSISTANT_SID;
+const AI_ASSISTANT_PHONE_NUMBER = import.meta.env.VITE_AI_ASSISTANT_PHONE_NUMBER;
 
 const Contact = () => {
   const [token, setToken] = useState<string | null>(null);
@@ -69,7 +70,7 @@ const Contact = () => {
               
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">Phone</h2>
-                <p className="text-gray-600">+1 (888) 794-1151</p>
+                <p className="text-gray-600">{AI_ASSISTANT_PHONE_NUMBER}</p>
               </div>
               
               <div>

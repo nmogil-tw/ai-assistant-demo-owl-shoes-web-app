@@ -180,7 +180,14 @@ cp .env.example .env
 5. Deploy the assistant:
 
 ```bash
+# Deploy the AI Assistant
 npm run deploy
+
+# Redeploy Functions (useful during development)
+npm run redeploy
+
+# Start the Web App in development mode
+npm run deploy:web
 ```
 
 ## Connecting Channels

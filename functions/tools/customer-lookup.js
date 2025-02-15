@@ -24,9 +24,9 @@ exports.handler = async function (context, event, callback) {
 
     // Parse the identity header
     let queryField, queryValue;
-    if (identityHeader.startsWith('email:')) {
+    if (identityHeader.startsWith('email:') || identityHeader.startsWith('user_id:')) {
       queryField = 'email';
-      queryValue = identityHeader.replace('email:', '').trim();
+      queryValue = identityHeader.replace(/^(email:|user_id:)/, '').trim();
     } else if (identityHeader.startsWith('phone:')) {
       queryField = 'phone';
       queryValue = identityHeader.replace('phone:', '').trim();
@@ -36,7 +36,7 @@ exports.handler = async function (context, event, callback) {
     } else {
       return callback(null, {
         status: 400,
-        message: 'Invalid x-identity format. Use "email:<email>" or "phone:<phone>".',
+        message: 'Invalid x-identity format. Use "email:<email>", "user_id:<email>" or "phone:<phone>".',
       });
     }
 

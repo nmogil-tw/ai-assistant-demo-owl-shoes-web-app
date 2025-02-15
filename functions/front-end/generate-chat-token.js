@@ -16,7 +16,7 @@ exports.handler = async function(context, event, callback) {
       const { ChatGrant } = AccessToken;
       
       // Get required environment variables
-      const accountSid = context.TWILIO_ACCOUNT_SID;
+      const accountSid = context.ACCOUNT_SID;
       const apiKey = context.TWILIO_API_KEY;
       const apiSecret = context.TWILIO_API_SECRET;
       const serviceSid = context.TWILIO_CHAT_SERVICE_SID;

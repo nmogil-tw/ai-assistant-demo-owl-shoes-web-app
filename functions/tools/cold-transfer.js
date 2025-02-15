@@ -4,6 +4,17 @@
  * @param {import('@twilio-labs/serverless-runtime-types/types').ServerlessCallback} callback
  */
 exports.handler = async function (context, event, callback) {
+    const response = new Twilio.Response();
+    response.appendHeader('Content-Type', 'application/json');
+
+    // Validate email from x-identity header
+    const userEmail = event.request.headers["x-identity"];
+    if (!userEmail) {
+      response.setStatusCode(401);
+      response.setBody({ error: 'Missing user identity. Please provide email in x-identity header.' });
+      return callback(null, response);
+    }
+
     const client = context.getTwilioClient();
   
     // Extract the session ID from headers

@@ -60,8 +60,15 @@ module.exports = (domain) => ({
     description:
       'Use this tool when the user wants to speak with a supervisor or when you are not able to fulfill their request. ALWAYS tell the user you are transferring them to a Supervisor before using this tool.',
     type: 'WEBHOOK',
-    method: 'GET',
+    method: 'POST',
     url: `https://${domain}/tools/send-to-flex`,
+    schema: {
+      conversation_summary: 'string', //summary of the user conversation with the AI agent so far
+      next_steps: 'string', //next steps for the supervisor
+      customer_name: 'string', //name of the customer
+      customer_email: 'string', //email of the customer
+      last_order_summary: 'string', //summary of the last order
+    },
   },
   placeOrder: {
     name: 'Place Order',
