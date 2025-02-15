@@ -1,41 +1,4 @@
-# Dependencies
 node_modules/
-.pnp
-.pnp.js
-
-# Environment files
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Build outputs
-dist/
-build/
-.twiliodeployinfo
-
-# IDE and OS files
-.idea/
-.vscode/
-*.sublime-workspace
-*.sublime-project
 .DS_Store
-Thumbs.db
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-logs
-*.log
-
-# Parent directory (explicitly ignore)
-../ai-assistant-demo-owl-events/
-../ai-assistant-demo-owl-shoes/
-../ai-assistant-lead-gen/
-../cozy-owl-shoehaven/
-../notes/
-../retail-ai-assistants/
-../.DS_Store
-../.vscode/
+.twiliodeployinfo
