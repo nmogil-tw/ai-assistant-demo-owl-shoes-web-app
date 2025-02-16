@@ -51,7 +51,6 @@ exports.handler = async function(context, event, callback) {
             "items": JSON.stringify(items),
             "total_amount": totalAmount,
             "shipping_status": "pending",
-            "customer_id": customerId,
             "email": email,
             "phone": phone
         });

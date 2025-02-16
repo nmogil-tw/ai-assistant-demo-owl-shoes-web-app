@@ -16,18 +16,26 @@ exports.handler = async function (context, event, callback) {
       const syncDocumentName = callSid + '_conversation_summary';
       console.log(syncDocumentName);
       
-      // Wrap Sync operations in a try-catch but continue regardless of outcome
-      if (conversation_summary) {
+      // Save all relevant properties to Sync
+      if (conversation_summary || next_steps || customer_name || customer_email || last_order_summary) {
+          const syncData = {
+              conversation_summary,
+              next_steps,
+              customer_name,
+              customer_email,
+              last_order_summary
+          };
+          
           try {
               await client.sync.services(syncServiceSid)
                   .documents(syncDocumentName)
-                  .update({ data: { conversation_summary } });
+                  .update({ data: syncData });
           } catch (error) {
               if (error.code === 20404) {
                   try {
                       await client.sync.services(syncServiceSid)
                           .documents
-                          .create({ uniqueName: syncDocumentName, data: { conversation_summary } });
+                          .create({ uniqueName: syncDocumentName, data: syncData });
                       console.log("created doc " + syncDocumentName);
                   } catch (createError) {
                       console.error("Failed to create Sync document:", createError);
