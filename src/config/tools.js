@@ -81,4 +81,14 @@ module.exports = (domain) => ({
       product_id: 'string', //the product id to order
     },
   },
+  sendSms: {
+    name: 'Send SMS',
+    description: 'Use this tool to send an SMS message to the customer. The customer must have a phone number in their profile.',
+    type: 'WEBHOOK',
+    method: 'POST',
+    url: `https://${domain}/tools/send-sms`,
+    schema: {
+      body: 'string', //the message content to send to the customer
+    },
+  },
 });
