@@ -49,9 +49,9 @@ exports.handler = async function(context, event, callback) {
             userId: formData.email,
             event: "Order Placed",
             properties: {
-                orderId: formData.order_id,
-                totalAmount: formData.total_amount,
-                items: formData.items
+                orderId: orderData.order_id,
+                totalAmount: orderData.total_amount,
+                items: orderData.items
             },
         };
 
