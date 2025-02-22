@@ -7,10 +7,12 @@ export interface CheckoutFormData {
   city: string;
   state: string;
   zipCode: string;
+  smsOptIn: boolean;
 }
 
 export interface CartItem {
   id: string;
+  name: string;
   price: number;
   quantity: number;
   [key: string]: any;
@@ -28,4 +30,13 @@ export interface Customer {
   state: string;
   zip_code: string;
   created_at?: string;
+}
+
+export interface OrderResponse {
+  success: boolean;
+  data: {
+    id: string;
+    [key: string]: any;
+  };
+  error?: string;
 }

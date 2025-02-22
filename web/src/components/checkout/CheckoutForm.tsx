@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { faker } from "@faker-js/faker";
 import { CheckoutFormData } from "@/types/checkout";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface CheckoutFormProps {
   onSubmit: (data: CheckoutFormData) => Promise<void>;
@@ -19,6 +20,7 @@ export const CheckoutForm = ({ onSubmit, loading }: CheckoutFormProps) => {
     city: "",
     state: "",
     zipCode: "",
+    smsOptIn: false,
   });
 
   const formatPhoneToE164 = (phone: string): string => {
@@ -53,6 +55,7 @@ export const CheckoutForm = ({ onSubmit, loading }: CheckoutFormProps) => {
       city: faker.location.city(),
       state: faker.location.state(),
       zipCode: faker.location.zipCode(),
+      smsOptIn: false,
     });
   };
 
@@ -154,6 +157,21 @@ export const CheckoutForm = ({ onSubmit, loading }: CheckoutFormProps) => {
               }
               required
             />
+          </div>
+          <div className="md:col-span-2 flex items-center space-x-2">
+            <Checkbox
+              id="smsOptIn"
+              checked={formData.smsOptIn}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, smsOptIn: checked as boolean })
+              }
+            />
+            <label
+              htmlFor="smsOptIn"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Yes, I would like to receive order updates via SMS
+            </label>
           </div>
         </div>
         <Button type="submit" className="w-full" disabled={loading}>

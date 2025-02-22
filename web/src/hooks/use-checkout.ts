@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { twilioApi } from "@/integrations/twilio";
-import { CheckoutFormData, CartItem, Customer } from "@/types/checkout";
+import { CheckoutFormData, CartItem, Customer, OrderResponse } from "@/types/checkout";
 
 export const useCheckout = () => {
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ export const useCheckout = () => {
         customerId: customer.id,
         email: formData.email,
         phone: formData.phone
-      });
+      }) as OrderResponse;
 
       if (!orderResponse.success) {
         throw new Error(orderResponse.error || "Failed to create order");
@@ -67,11 +67,49 @@ export const useCheckout = () => {
         totalAmount
       });
 
+      // Send SMS if user opted in
+      if (formData.smsOptIn) {
+        console.log("Sending order confirmation SMS", {
+          formData,
+          orderData: {
+            order_id: orderResponse.data.id,
+            total_amount: totalAmount,
+            items: cartItems
+          }
+        });
+        
+        const smsResponse = await twilioApi.orders.sendOrderSms({
+          formData,
+          orderData: {
+            order_id: orderResponse.data.id,
+            total_amount: totalAmount,
+            items: cartItems
+          }
+        });
+
+        console.log("SMS response:", smsResponse);
+
+        if (!smsResponse.success) {
+          console.error("Failed to send SMS:", smsResponse.error);
+          // Don't throw error here, as the order was still successful
+          toast({
+            title: "Order placed successfully",
+            description: "However, we couldn't send the confirmation SMS. You can check your order status online.",
+            variant: "default"
+          });
+        }
+      } else {
+        console.log("SMS opt-in not selected, skipping SMS");
+      }
+
       // Clear cart and show success message
       localStorage.removeItem("cart");
       toast({
         title: "Order placed successfully!",
-        description: "Thank you for your purchase.",
+        description: formData.smsOptIn 
+          ? "Thank you for your purchase. You'll receive an SMS confirmation shortly."
+          : "Thank you for your purchase.",
+        variant: "default"
       });
       
       // Navigate to home page

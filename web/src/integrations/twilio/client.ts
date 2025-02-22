@@ -72,6 +72,12 @@ export const twilioApi = {
         body: JSON.stringify(orderData),
       });
     },
+    sendOrderSms: async (data: { formData: any; orderData: any }) => {
+      return fetchFromFunction('send-order-sms', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
     checkShippingStatus: async (orderId: string) => {
       return fetchFromFunction('check-shipping-status', {
         method: 'POST',
