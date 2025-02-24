@@ -31,13 +31,14 @@ exports.handler = async function(context, event, callback) {
             .join('\n');
 
         // Construct the SMS message
-        const message = `Thank you for your order!\n\n` +
+        const message = `🛍️ Thank you for your order!\n\n` +
             `Order ID: ${orderData.order_id}\n` +
             `Items:\n${itemsList}\n` +
             `Total Amount: $${orderData.total_amount.toFixed(2)}\n\n` +
-            `Shipping to:\n` +
+            `📦 Shipping to:\n` +
             `${formData.address}\n` +
-            `${formData.city}, ${formData.state} ${formData.zipCode}`;
+            `${formData.city}, ${formData.state} ${formData.zipCode}\n\n` +
+            `Questions? Feel free to text or call this number! 📱`;
 
         // Send the SMS
         await client.messages.create({

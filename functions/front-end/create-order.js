@@ -58,8 +58,7 @@ exports.handler = async function(context, event, callback) {
         response.setBody({
             success: true,
             data: {
-                id: newOrder.id,
-                order_id: orderId,
+                id: orderId,
                 items: JSON.parse(newOrder.fields.items),
                 total_amount: newOrder.fields.total_amount,
                 shipping_status: newOrder.fields.shipping_status,
