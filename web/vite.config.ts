@@ -8,11 +8,12 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     cors: true,
-    hmr: {
-      host: "fe4e-2603-7000-8c00-136e-91a3-1c85-c2a3-f816.ngrok-free.app",
+    hmr: process.env.NGROK_URL ? {
+      host: process.env.NGROK_URL,
       protocol: "https",
       clientPort: 443
-    }
+    } : true,
+    allowedHosts: ['.ngrok-free.app', '.ngrok.io']
   },
   plugins: [
     react(),
