@@ -32,10 +32,10 @@ export const useCheckout = () => {
         lastName: formData.lastName,
         email: formData.email,
         phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zipCode: formData.zipCode
+        address: formData.isStorePickup ? "" : formData.address,
+        city: formData.isStorePickup ? "" : formData.city,
+        state: formData.isStorePickup ? "" : formData.state,
+        zipCode: formData.isStorePickup ? "" : formData.zipCode
       });
 
       if (!customerResponse.success) {
@@ -51,7 +51,10 @@ export const useCheckout = () => {
         totalAmount,
         customerId: customer.id,
         email: formData.email,
-        phone: formData.phone
+        phone: formData.phone,
+        isStorePickup: formData.isStorePickup,
+        storeId: formData.storeId,
+        storeName: formData.storeName
       }) as OrderResponse;
 
       if (!orderResponse.success) {
@@ -74,7 +77,9 @@ export const useCheckout = () => {
           orderData: {
             order_id: orderResponse.data.id,
             total_amount: totalAmount,
-            items: cartItems
+            items: cartItems,
+            isStorePickup: formData.isStorePickup,
+            storeName: formData.storeName
           }
         });
         
@@ -83,7 +88,9 @@ export const useCheckout = () => {
           orderData: {
             order_id: orderResponse.data.id,
             total_amount: totalAmount,
-            items: cartItems
+            items: cartItems,
+            isStorePickup: formData.isStorePickup,
+            storeName: formData.storeName
           }
         });
 
@@ -104,11 +111,15 @@ export const useCheckout = () => {
 
       // Clear cart and show success message
       localStorage.removeItem("cart");
+      
+      // Customize success message based on delivery method
+      const successDescription = formData.isStorePickup
+        ? `Thank you for your purchase. ${formData.smsOptIn ? "You'll receive an SMS confirmation shortly. " : ""}Your order will be available for pickup at ${formData.storeName}.`
+        : `Thank you for your purchase. ${formData.smsOptIn ? "You'll receive an SMS confirmation shortly." : ""}`;
+      
       toast({
         title: "Order placed successfully!",
-        description: formData.smsOptIn 
-          ? "Thank you for your purchase. You'll receive an SMS confirmation shortly."
-          : "Thank you for your purchase.",
+        description: successDescription,
         variant: "default"
       });
       

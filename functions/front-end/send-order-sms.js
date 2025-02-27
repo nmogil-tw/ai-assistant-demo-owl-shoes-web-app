@@ -30,15 +30,24 @@ exports.handler = async function(context, event, callback) {
             .map(item => `${item.quantity}x ${item.name}`)
             .join('\n');
 
-        // Construct the SMS message
-        const message = `🛍️ Thank you for your order!\n\n` +
+        // Construct the SMS message based on delivery method
+        let message = `🛍️ Thank you for your order!\n\n` +
             `Order ID: ${orderData.order_id}\n` +
             `Items:\n${itemsList}\n` +
-            `Total Amount: $${orderData.total_amount.toFixed(2)}\n\n` +
-            `📦 Shipping to:\n` +
-            `${formData.address}\n` +
-            `${formData.city}, ${formData.state} ${formData.zipCode}\n\n` +
-            `Questions? Feel free to text or call this number! 📱`;
+            `Total Amount: $${orderData.total_amount.toFixed(2)}\n\n`;
+        
+        // Add delivery information based on method
+        if (orderData.isStorePickup) {
+            message += `🏬 Your order will be available for pickup at:\n` +
+                `${orderData.storeName}\n\n` +
+                `Please bring your ID and order number when you pick up your order.\n\n`;
+        } else {
+            message += `📦 Shipping to:\n` +
+                `${formData.address}\n` +
+                `${formData.city}, ${formData.state} ${formData.zipCode}\n\n`;
+        }
+        
+        message += `Questions? Feel free to text or call this number! 📱`;
 
         // Send the SMS
         await client.messages.create({

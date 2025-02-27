@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { faker } from "@faker-js/faker";
 import { CheckoutFormData } from "@/types/checkout";
 import { Checkbox } from "@/components/ui/checkbox";
+import { StorePickup } from "@/components/checkout/StorePickup";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface CheckoutFormProps {
   onSubmit: (data: CheckoutFormData) => Promise<void>;
@@ -21,7 +23,12 @@ export const CheckoutForm = ({ onSubmit, loading }: CheckoutFormProps) => {
     state: "",
     zipCode: "",
     smsOptIn: false,
+    isStorePickup: false,
+    storeId: "",
+    storeName: "",
   });
+
+  const [deliveryMethod, setDeliveryMethod] = useState<"shipping" | "pickup">("shipping");
 
   const formatPhoneToE164 = (phone: string): string => {
     // Remove all non-digit characters
@@ -56,12 +63,30 @@ export const CheckoutForm = ({ onSubmit, loading }: CheckoutFormProps) => {
       state: faker.location.state(),
       zipCode: faker.location.zipCode(),
       smsOptIn: false,
+      isStorePickup: false,
+      storeId: "",
+      storeName: "",
     });
+    
+    setDeliveryMethod("shipping");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    // Update isStorePickup based on delivery method
+    const updatedFormData = {
+      ...formData,
+      isStorePickup: deliveryMethod === "pickup"
+    };
+    
+    // If not store pickup, clear store data
+    if (deliveryMethod !== "pickup") {
+      updatedFormData.storeId = "";
+      updatedFormData.storeName = "";
+    }
+    
+    onSubmit(updatedFormData);
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,6 +96,18 @@ export const CheckoutForm = ({ onSubmit, loading }: CheckoutFormProps) => {
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, email: e.target.value.toLowerCase() });
+  };
+
+  const handleStoreSelect = (storeId: string, storeName: string) => {
+    setFormData({
+      ...formData,
+      storeId,
+      storeName
+    });
+  };
+
+  const handleDeliveryMethodChange = (value: string) => {
+    setDeliveryMethod(value as "shipping" | "pickup");
   };
 
   return (
@@ -120,61 +157,99 @@ export const CheckoutForm = ({ onSubmit, loading }: CheckoutFormProps) => {
               placeholder="+12345678900"
             />
           </div>
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium mb-2">Address</label>
-            <Input
-              value={formData.address}
-              onChange={(e) =>
-                setFormData({ ...formData, address: e.target.value })
-              }
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">City</label>
-            <Input
-              value={formData.city}
-              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">State</label>
-            <Input
-              value={formData.state}
-              onChange={(e) =>
-                setFormData({ ...formData, state: e.target.value })
-              }
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">ZIP Code</label>
-            <Input
-              value={formData.zipCode}
-              onChange={(e) =>
-                setFormData({ ...formData, zipCode: e.target.value })
-              }
-              required
-            />
-          </div>
-          <div className="md:col-span-2 flex items-center space-x-2">
-            <Checkbox
-              id="smsOptIn"
-              checked={formData.smsOptIn}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, smsOptIn: checked as boolean })
-              }
-            />
-            <label
-              htmlFor="smsOptIn"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Yes, I would like to receive order updates via SMS
-            </label>
-          </div>
         </div>
-        <Button type="submit" className="w-full" disabled={loading}>
+
+        <div className="border rounded-md p-4 mt-6">
+          <h2 className="text-lg font-semibold mb-4">Delivery Method</h2>
+          <Tabs 
+            defaultValue="shipping" 
+            value={deliveryMethod}
+            onValueChange={handleDeliveryMethodChange}
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="shipping">Ship to Address</TabsTrigger>
+              <TabsTrigger value="pickup">Store Pickup</TabsTrigger>
+            </TabsList>
+            <TabsContent value="shipping" className="mt-4">
+              <div className="space-y-4">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium mb-2">Address</label>
+                  <Input
+                    value={formData.address}
+                    onChange={(e) =>
+                      setFormData({ ...formData, address: e.target.value })
+                    }
+                    required={deliveryMethod === "shipping"}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">City</label>
+                    <Input
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      required={deliveryMethod === "shipping"}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">State</label>
+                    <Input
+                      value={formData.state}
+                      onChange={(e) =>
+                        setFormData({ ...formData, state: e.target.value })
+                      }
+                      required={deliveryMethod === "shipping"}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">ZIP Code</label>
+                    <Input
+                      value={formData.zipCode}
+                      onChange={(e) =>
+                        setFormData({ ...formData, zipCode: e.target.value })
+                      }
+                      required={deliveryMethod === "shipping"}
+                    />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="pickup" className="mt-4">
+              <StorePickup 
+                onStoreSelect={handleStoreSelect}
+                selectedStoreId={formData.storeId}
+              />
+              {formData.storeId && (
+                <div className="mt-4 p-3 bg-green-50 text-green-800 rounded-md">
+                  You've selected: <strong>{formData.storeName}</strong> for pickup
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="smsOptIn"
+            checked={formData.smsOptIn}
+            onCheckedChange={(checked) =>
+              setFormData({ ...formData, smsOptIn: checked as boolean })
+            }
+          />
+          <label
+            htmlFor="smsOptIn"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Yes, I would like to receive order updates via SMS
+          </label>
+        </div>
+
+        <Button 
+          type="submit" 
+          className="w-full" 
+          disabled={loading || (deliveryMethod === "pickup" && !formData.storeId)}
+        >
           {loading ? "Placing Order..." : "Place Order"}
         </Button>
       </form>

@@ -15,7 +15,16 @@ exports.handler = async function(context, event, callback) {
         const client = require('airtable');
         const base = new client({apiKey: context.AIRTABLE_API_KEY}).base(context.AIRTABLE_BASE_ID);
         
-        const { items, totalAmount, customerId, email, phone } = event;
+        const { 
+            items, 
+            totalAmount, 
+            customerId, 
+            email, 
+            phone, 
+            isStorePickup = false, 
+            storeId = '', 
+            storeName = '' 
+        } = event;
         
         // Debug logging
         console.log('Received order data:', {
@@ -23,7 +32,10 @@ exports.handler = async function(context, event, callback) {
             totalAmount: totalAmount || 'missing',
             customerId: customerId || 'missing',
             email: email || 'missing',
-            phone: phone || 'missing'
+            phone: phone || 'missing',
+            isStorePickup,
+            storeId: isStorePickup ? storeId : 'N/A',
+            storeName: isStorePickup ? storeName : 'N/A'
         });
         
         // Validate required fields with specific error message
@@ -33,6 +45,12 @@ exports.handler = async function(context, event, callback) {
         if (!customerId) missingFields.push('customerId');
         if (!email) missingFields.push('email');
         if (!phone) missingFields.push('phone');
+        
+        // Validate store pickup fields if isStorePickup is true
+        if (isStorePickup) {
+            if (!storeId) missingFields.push('storeId');
+            if (!storeName) missingFields.push('storeName');
+        }
         
         if (missingFields.length > 0) {
             response.setStatusCode(400);
@@ -46,26 +64,47 @@ exports.handler = async function(context, event, callback) {
         // Generate random 6 digit order ID
         const orderId = Math.floor(100000 + Math.random() * 900000).toString();
 
-        const newOrder = await base('orders').create({
+        // Create order record with store pickup information if applicable
+        const orderData = {
             "id": orderId,
             "items": JSON.stringify(items),
             "total_amount": totalAmount,
             "shipping_status": "pending",
             "email": email,
-            "phone": phone
-        });
+            "phone": phone,
+            "is_store_pickup": isStorePickup
+        };
+        
+        // Add store pickup fields if applicable
+        if (isStorePickup) {
+            orderData.store_id = storeId;
+            orderData.store_name = storeName;
+            orderData.shipping_status = "ready for pickup";
+        }
+
+        const newOrder = await base('orders').create(orderData);
+        
+        // Prepare response data
+        const responseData = {
+            id: orderId,
+            items: JSON.parse(newOrder.fields.items),
+            total_amount: newOrder.fields.total_amount,
+            shipping_status: newOrder.fields.shipping_status,
+            customer_id: newOrder.fields.customer_id,
+            email: newOrder.fields.email,
+            phone: newOrder.fields.phone,
+            is_store_pickup: newOrder.fields.is_store_pickup
+        };
+        
+        // Add store pickup fields to response if applicable
+        if (isStorePickup) {
+            responseData.store_id = newOrder.fields.store_id;
+            responseData.store_name = newOrder.fields.store_name;
+        }
         
         response.setBody({
             success: true,
-            data: {
-                id: orderId,
-                items: JSON.parse(newOrder.fields.items),
-                total_amount: newOrder.fields.total_amount,
-                shipping_status: newOrder.fields.shipping_status,
-                customer_id: newOrder.fields.customer_id,
-                email: newOrder.fields.email,
-                phone: newOrder.fields.phone
-            }
+            data: responseData
         });
         
         return callback(null, response);

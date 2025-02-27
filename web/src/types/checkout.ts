@@ -8,6 +8,9 @@ export interface CheckoutFormData {
   state: string;
   zipCode: string;
   smsOptIn: boolean;
+  isStorePickup: boolean;
+  storeId?: string;
+  storeName?: string;
 }
 
 export interface CartItem {
@@ -39,4 +42,28 @@ export interface OrderResponse {
     [key: string]: any;
   };
   error?: string;
+}
+
+export interface StoreLocation {
+  id: string;
+  storeId: string;
+  storeName: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  phoneNumber: string;
+  email: string;
+  hoursMonday: string;
+  hoursTuesday: string;
+  hoursWednesday: string;
+  hoursThursday: string;
+  hoursFriday: string;
+  hoursSaturday: string;
+  hoursSunday: string;
+  hasParking: string;
+  isWheelchairAccessible: string;
+  storeManager: string;
+  latitude: number;
+  longitude: number;
 }
