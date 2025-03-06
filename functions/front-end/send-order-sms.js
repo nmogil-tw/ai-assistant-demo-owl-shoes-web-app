@@ -49,7 +49,7 @@ exports.handler = async function(context, event, callback) {
         
         message += `Questions? Feel free to text or call this number! 📱`;
 
-        // Send the SMS
+        // Send the initial SMS
         await client.messages.create({
             body: message,
             to: formData.phone,
@@ -57,6 +57,45 @@ exports.handler = async function(context, event, callback) {
         });
 
         console.log("SMS sent successfully to:", formData.phone);
+
+        // Trigger AI Assistant for upsell if it's a store pickup order
+        if (orderData.isStorePickup) {
+            try {
+                // Prepare context for the AI Assistant
+                const customerContext = {
+                    phone: formData.phone,
+                    name: formData.firstName || 'Customer',
+                    order_id: orderData.order_id,
+                    items: orderData.items,
+                    total_amount: orderData.total_amount,
+                    store_name: orderData.storeName
+                };
+                
+                // Create a message prompt for the AI Assistant with all necessary context
+                const messageBody = `CUSTOMER_CONTEXT: ${JSON.stringify(customerContext)}\n\n` +
+                    `This customer has placed an order for pickup at ${orderData.storeName}. ` +
+                    `Their order includes: ${itemsList}. ` +
+                    `Total spent: $${orderData.total_amount.toFixed(2)}. ` +
+                    `Send them a personalized follow-up message with relevant upsell suggestions based on their purchase so the use can buy more products from the store and pick it up at the same time as their original order.`;
+                
+                // Send to AI Assistant
+                await client.assistants.v1
+                    .assistants(context.ASSISTANT_ID)
+                    .messages
+                    .create({
+                        identity: `phone:${formData.phone}`,
+                        body: messageBody,
+                        webhook: `https://${context.DOMAIN_NAME}/channels/messaging/assistant-webhook-handler`,
+                        mode: "chat"
+                    });
+                
+                console.log("AI Assistant triggered for upsell to:", formData.phone);
+            } catch (assistantError) {
+                // Just log the error but don't fail the main function
+                console.error("Error triggering AI Assistant:", assistantError.message);
+                // We don't return here as we want the main function to succeed even if the assistant call fails
+            }
+        }
 
         response.setBody({
             success: true,

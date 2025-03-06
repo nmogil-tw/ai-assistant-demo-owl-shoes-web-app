@@ -50,19 +50,34 @@ exports.handler = async function (context, event, callback) {
 
     // Parse the identity header
     let queryField, queryValue;
-    if (identityHeader.startsWith('email:') || identityHeader.startsWith('user_id:')) {
+    if (identityHeader.startsWith('user_id:')) {
+      const userIdValue = identityHeader.replace(/^user_id:/, '').trim();
+      if (userIdValue.includes('@')) {
+        // If it contains @, treat as email
+        queryField = 'email';
+        queryValue = userIdValue;
+      } else if (userIdValue.includes('+')) {
+        // If it contains +, treat as phone
+        queryField = 'phone';
+        queryValue = userIdValue;
+      } else {
+        // Default to email for backward compatibility
+        queryField = 'email';
+        queryValue = userIdValue;
+      }
+    } else if (identityHeader.startsWith('email:')) {
       queryField = 'email';
-      queryValue = identityHeader.replace(/^(email:|user_id:)/, '').trim();
+      queryValue = identityHeader.replace(/^email:/, '').trim();
     } else if (identityHeader.startsWith('phone:')) {
       queryField = 'phone';
-      queryValue = identityHeader.replace('phone:', '').trim();
+      queryValue = identityHeader.replace(/^phone:/, '').trim();
     } else if (identityHeader.startsWith('whatsapp:')) {
       queryField = 'phone';
-      queryValue = identityHeader.replace('whatsapp:', '').trim();
+      queryValue = identityHeader.replace(/^whatsapp:/, '').trim();
     } else {
       return callback(null, {
         status: 400,
-        message: 'Invalid x-identity format. Use "email:<email>", "user_id:<email>" or "phone:<phone>".',
+        message: 'Invalid x-identity format. Use "email:<email>", "user_id:<email or phone>" or "phone:<phone>".',
       });
     }
 
