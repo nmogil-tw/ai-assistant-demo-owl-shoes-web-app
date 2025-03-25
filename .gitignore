@@ -3,3 +3,5 @@ node_modules/
 .DS_Store
 .twiliodeployinfo
 .vscode/
+aiassistant-voice-live-transcription.txt
+live-call-instructions.md
