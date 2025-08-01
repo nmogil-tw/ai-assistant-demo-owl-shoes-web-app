@@ -1,4 +1,9 @@
 exports.handler = async function(context, event, callback) {
+  console.log('generate-chat-token called');
+  console.log('Request headers:', event.headers);
+  console.log('Request method:', event.request ? event.request.method : 'unknown');
+  console.log('Request origin:', event.headers ? event.headers.origin : 'unknown');
+
   // Set CORS headers
   const response = new Twilio.Response();
   response.appendHeader('Access-Control-Allow-Origin', '*');

@@ -13,9 +13,12 @@ const Contact = () => {
   useEffect(() => {
     const fetchToken = async () => {
       try {
-        console.log('Fetching chat token...');
+        // Log the function URL being used
+        const functionUrl = `https://${import.meta.env.VITE_TWILIO_FUNCTION_URL}/front-end/generate-chat-token`;
+        console.log('Attempting to fetch chat token from:', functionUrl);
+
         const response = await twilioApi.chat.generateToken();
-        
+
         // Log the entire response for debugging
         console.log('Response structure:', {
           success: response.success,
@@ -43,7 +46,8 @@ const Contact = () => {
         console.log('Valid token received');
         setToken(chatToken);
       } catch (error) {
-        console.error('Error initializing chat:', error);
+        // Log the full error object
+        console.error('Error initializing chat:', error, JSON.stringify(error));
         setError(error instanceof Error ? error.message : 'Unknown error occurred');
       }
     };
