@@ -22,30 +22,31 @@ exports.handler = async function(context, event, callback) {
         // Load industry configuration
         const industryConfig = JSON.parse(context.INDUSTRY_CONFIG || '{}');
 
-        // Extract form, order data, and event trigger
-        const { formData, orderData, eventTrigger = 'order_placed' } = event;
+        // Extract payload fields
+        const { eventTrigger = 'order_completed', anonymousId, properties = {}, formData } = event;
 
-        // Construct Identify payload
-        const identifyPayload = {
-            userId: formData.email,
-            traits: {
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                email: formData.email,
-                phone: formData.phone,
-                address: formData.address,
-                city: formData.city,
-                state: formData.state,
-                zipCode: formData.zipCode,
-            },
-        };
+        // Conditional Identify: only when formData is present (e.g., Order Completed)
+        if (formData) {
+            const identifyPayload = {
+                userId: formData.email,
+                traits: {
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    email: formData.email,
+                    phone: formData.phone,
+                    address: formData.address,
+                    city: formData.city,
+                    state: formData.state,
+                    zipCode: formData.zipCode,
+                },
+            };
 
-        // Send Identify request to Segment
-        await axios.post(SEGMENT_IDENTIFY_URL, identifyPayload, {
-            auth: { username: SEGMENT_WRITE_KEY, password: "" },
-        });
+            await axios.post(SEGMENT_IDENTIFY_URL, identifyPayload, {
+                auth: { username: SEGMENT_WRITE_KEY, password: "" },
+            });
 
-        console.log("Identify event sent to Segment:", identifyPayload);
+            console.log("Identify event sent to Segment:", identifyPayload);
+        }
 
         // Find event configuration based on trigger
         let eventConfig = null;
@@ -53,45 +54,25 @@ exports.handler = async function(context, event, callback) {
             eventConfig = industryConfig.segment.events.find(e => e.trigger === eventTrigger);
         }
 
-        // Fallback to default if no industry config
+        // Fallback to trigger name if no industry config match
         if (!eventConfig) {
             eventConfig = {
-                name: "Order Placed",
-                properties: ["orderId", "totalAmount", "items"]
+                name: eventTrigger,
             };
         }
 
-        // Build dynamic properties based on event config
-        const eventProperties = {};
-        eventConfig.properties.forEach(prop => {
-            // Map common property names
-            const propMap = {
-                'order_id': orderData.order_id,
-                'total_amount': orderData.total_amount,
-                'product_id': orderData.items?.[0]?.id,
-                'category': orderData.items?.[0]?.category,
-                'brand': orderData.items?.[0]?.brand,
-                'speed': orderData.items?.[0]?.speed,
-                'data_allowance': orderData.items?.[0]?.data_allowance,
-                'contract_months': orderData.items?.[0]?.contract_months,
-                'plan_id': orderData.items?.[0]?.id,
-                // Legacy support
-                'orderId': orderData.order_id,
-                'totalAmount': orderData.total_amount,
-                'items': orderData.items
-            };
-
-            if (propMap[prop] !== undefined) {
-                eventProperties[prop] = propMap[prop];
-            }
-        });
-
-        // Construct Track payload with dynamic event name and properties
+        // Construct Track payload
         const trackPayload = {
-            userId: formData.email,
             event: eventConfig.name,
-            properties: eventProperties,
+            properties,
         };
+
+        // Use userId when formData is available, otherwise use anonymousId
+        if (formData && formData.email) {
+            trackPayload.userId = formData.email;
+        } else if (anonymousId) {
+            trackPayload.anonymousId = anonymousId;
+        }
 
         // Send Track request to Segment
         await axios.post(SEGMENT_TRACK_URL, trackPayload, {
@@ -104,14 +85,14 @@ exports.handler = async function(context, event, callback) {
             success: true,
             message: "Data sent to Segment successfully"
         });
-        
+
         return callback(null, response);
-        
+
     } catch (error) {
         console.error("Error sending data to Segment:", error.message);
         response.setStatusCode(500);
-        response.setBody({ 
-            success: false, 
+        response.setBody({
+            success: false,
             error: error.message || 'Error sending data to Segment'
         });
         return callback(null, response);

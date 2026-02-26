@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -5,6 +6,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { airtable } from "@/integrations/airtable/client";
 import type { Product } from "@/integrations/airtable/types.generated";
+import { trackSegmentEvent, ensureCartId } from "@/lib/segment";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -26,6 +28,21 @@ const ProductDetails = () => {
     },
   });
 
+  useEffect(() => {
+    if (product?.id) {
+      trackSegmentEvent({
+        eventTrigger: "product_viewed",
+        properties: {
+          product_id: product.id,
+          name: product.name,
+          price: product.price,
+          category: product.category,
+          brand: product.brand,
+        },
+      });
+    }
+  }, [product?.id]);
+
   const addToCart = () => {
     const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
     const existingItemIndex = cartItems.findIndex(
@@ -45,6 +62,19 @@ const ProductDetails = () => {
     }
 
     localStorage.setItem("cart", JSON.stringify(cartItems));
+
+    const cartId = ensureCartId();
+    trackSegmentEvent({
+      eventTrigger: "product_added",
+      properties: {
+        cart_id: cartId,
+        product_id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: existingItemIndex >= 0 ? cartItems[existingItemIndex].quantity : 1,
+      },
+    });
+
     toast({
       title: "Added to cart",
       description: `${product.name} added to your cart`,

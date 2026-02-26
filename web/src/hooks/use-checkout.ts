@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { twilioApi } from "@/integrations/twilio";
 import { CheckoutFormData, CartItem, Customer, OrderResponse } from "@/types/checkout";
+import { trackSegmentEvent, getCartId, clearCartId } from "@/lib/segment";
 
 export const useCheckout = () => {
   const navigate = useNavigate();
@@ -63,11 +64,20 @@ export const useCheckout = () => {
 
       // Send data to Segment via Twilio Function
       console.log("Sending data to Segment");
-      await twilioApi.analytics.sendToSegment({
+      trackSegmentEvent({
+        eventTrigger: "order_completed",
         formData,
-        orderData: orderResponse.data,
-        cartItems,
-        totalAmount
+        properties: {
+          order_id: orderResponse.data.id,
+          cart_id: getCartId(),
+          total: totalAmount,
+          products: cartItems.map((item) => ({
+            product_id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+          })),
+        },
       });
 
       // Send SMS if user opted in
@@ -111,6 +121,7 @@ export const useCheckout = () => {
 
       // Clear cart and show success message
       localStorage.removeItem("cart");
+      clearCartId();
       
       // Customize success message based on delivery method
       const successDescription = formData.isStorePickup

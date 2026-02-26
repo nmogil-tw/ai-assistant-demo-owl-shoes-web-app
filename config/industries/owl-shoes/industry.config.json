@@ -41,9 +41,34 @@
   "segment": {
     "events": [
       {
-        "name": "Order Placed",
-        "trigger": "order_placed",
-        "properties": ["product_id", "category", "brand", "size", "color", "total_amount"]
+        "name": "Product Viewed",
+        "trigger": "product_viewed",
+        "properties": ["product_id", "name", "price", "category", "brand"]
+      },
+      {
+        "name": "Product Added",
+        "trigger": "product_added",
+        "properties": ["cart_id", "product_id", "name", "price", "quantity"]
+      },
+      {
+        "name": "Product Removed",
+        "trigger": "product_removed",
+        "properties": ["cart_id", "product_id", "name", "price"]
+      },
+      {
+        "name": "Cart Viewed",
+        "trigger": "cart_viewed",
+        "properties": ["cart_id", "products", "total"]
+      },
+      {
+        "name": "Checkout Started",
+        "trigger": "checkout_started",
+        "properties": ["cart_id", "products", "total"]
+      },
+      {
+        "name": "Order Completed",
+        "trigger": "order_completed",
+        "properties": ["order_id", "cart_id", "total", "products"]
       }
     ]
   },

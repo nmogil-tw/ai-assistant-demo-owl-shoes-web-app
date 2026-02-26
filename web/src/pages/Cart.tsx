@@ -4,6 +4,7 @@ import { Navigation } from "@/components/Navigation";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { trackSegmentEvent, getCartId } from "@/lib/segment";
 
 interface CartItem {
   id: string;
@@ -22,6 +23,27 @@ const Cart = () => {
   useEffect(() => {
     const items = JSON.parse(localStorage.getItem("cart") || "[]");
     setCartItems(items);
+
+    const cartId = getCartId();
+    if (items.length > 0 && cartId) {
+      const cartTotal = items.reduce(
+        (sum: number, item: CartItem) => sum + item.price * item.quantity,
+        0
+      );
+      trackSegmentEvent({
+        eventTrigger: "cart_viewed",
+        properties: {
+          cart_id: cartId,
+          products: items.map((item: CartItem) => ({
+            product_id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+          })),
+          total: cartTotal,
+        },
+      });
+    }
   }, []);
 
   const updateCart = (newItems: CartItem[]) => {
@@ -36,8 +58,23 @@ const Cart = () => {
   };
 
   const removeItem = (index: number) => {
+    const removedItem = cartItems[index];
     const newItems = cartItems.filter((_, i) => i !== index);
     updateCart(newItems);
+
+    const cartId = getCartId();
+    if (cartId && removedItem) {
+      trackSegmentEvent({
+        eventTrigger: "product_removed",
+        properties: {
+          cart_id: cartId,
+          product_id: removedItem.id,
+          name: removedItem.name,
+          price: removedItem.price,
+        },
+      });
+    }
+
     toast({
       title: "Item removed from cart",
       duration: 2000,
@@ -48,6 +85,26 @@ const Cart = () => {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  const handleCheckout = () => {
+    const cartId = getCartId();
+    if (cartId) {
+      trackSegmentEvent({
+        eventTrigger: "checkout_started",
+        properties: {
+          cart_id: cartId,
+          products: cartItems.map((item) => ({
+            product_id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+          })),
+          total,
+        },
+      });
+    }
+    navigate("/checkout");
+  };
 
   if (cartItems.length === 0) {
     return (
@@ -116,7 +173,7 @@ const Cart = () => {
         </div>
         <div className="mt-8 text-right">
           <p className="text-2xl font-bold">Total: ${total.toFixed(2)}</p>
-          <Button className="mt-4" onClick={() => navigate("/checkout")}>
+          <Button className="mt-4" onClick={handleCheckout}>
             Proceed to Checkout
           </Button>
         </div>
