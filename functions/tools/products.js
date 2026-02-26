@@ -1,5 +1,13 @@
 const Airtable = require('airtable');
 
+/**
+ * Product Lookup Function
+ *
+ * Generated for: Talk Talk
+ * Industry: telecommunications
+ * Entity: plans
+ */
+
 exports.handler = async function (context, event, callback) {
   try {
     // Validate Airtable configuration
@@ -13,25 +21,25 @@ exports.handler = async function (context, event, callback) {
     // Airtable setup
     const base = new Airtable({apiKey: context.AIRTABLE_API_KEY}).base(context.AIRTABLE_BASE_ID);
 
-    console.log('Querying all products from products table');
+    console.log('Querying all plans from plans table');
 
-    // Query all products from Airtable
-    const records = await base('products')
+    // Query all plans from Airtable
+    const records = await base('plans')
       .select()
       .all();  // Use .all() to get all records, not just the first page
 
     if (!records || records.length === 0) {
-      console.log('No products found in the database');
+      console.log('No plans found in the database');
       return callback(null, {
         status: 404,
-        message: 'No products found in the database',
+        message: 'No plans found in the database',
       });
     }
 
-    console.log(`Found ${records.length} products`);
+    console.log(`Found ${records.length} plans`);
     return callback(null, {
       status: 200,
-      products: records.map(record => record.fields),
+      plans: records.map(record => record.fields),
     });
 
   } catch (err) {

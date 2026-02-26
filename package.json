@@ -4,13 +4,16 @@
     "description": "Twilio AI Assistant Deployment Tool",
     "main": "src/deploy.js",
     "scripts": {
+        "build": "node src/build.js",
         "deploy": "node src/deploy.js",
         "redeploy": "node src/redeploy.js",
-        "deploy:web": "cd web && npm run dev"
+        "deploy:web": "cd web && npm run dev",
+        "switch": "node src/build.js"
     },
     "dependencies": {
         "airtable": "^0.12.2",
         "dotenv": "^16.4.7",
+        "handlebars": "^4.7.8",
         "twilio": "^5.4.1"
     },
     "engines": {

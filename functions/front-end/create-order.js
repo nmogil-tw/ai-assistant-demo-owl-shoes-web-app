@@ -64,23 +64,16 @@ exports.handler = async function(context, event, callback) {
         // Generate random 6 digit order ID
         const orderId = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Create order record with store pickup information if applicable
+        // Create order record
         const orderData = {
             "id": orderId,
+            "customer_id": customerId,
             "items": JSON.stringify(items),
             "total_amount": totalAmount,
             "shipping_status": "pending",
             "email": email,
-            "phone": phone,
-            "is_store_pickup": isStorePickup
+            "phone": phone
         };
-        
-        // Add store pickup fields if applicable
-        if (isStorePickup) {
-            orderData.store_id = storeId;
-            orderData.store_name = storeName;
-            orderData.shipping_status = "ready for pickup";
-        }
 
         const newOrder = await base('orders').create(orderData);
         
@@ -92,16 +85,9 @@ exports.handler = async function(context, event, callback) {
             shipping_status: newOrder.fields.shipping_status,
             customer_id: newOrder.fields.customer_id,
             email: newOrder.fields.email,
-            phone: newOrder.fields.phone,
-            is_store_pickup: newOrder.fields.is_store_pickup
+            phone: newOrder.fields.phone
         };
-        
-        // Add store pickup fields to response if applicable
-        if (isStorePickup) {
-            responseData.store_id = newOrder.fields.store_id;
-            responseData.store_name = newOrder.fields.store_name;
-        }
-        
+
         response.setBody({
             success: true,
             data: responseData

@@ -3,22 +3,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { Navigation } from "@/components/Navigation";
 import { airtable } from "@/integrations/airtable/client";
-import type { Product } from "@/integrations/airtable/types";
+import type { Product } from "@/integrations/airtable/types.generated";
+import { getCompanyInfo, getEntityName, getProductDisplayFields } from "@/lib/industryConfig.generated";
 
 const Index = () => {
   const navigate = useNavigate();
+  const companyInfo = getCompanyInfo();
+  const entityNamePlural = getEntityName(true);
+  const displayFields = getProductDisplayFields();
+
   const { data: products, isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
       try {
-        const products = await airtable.getAll("Products") as Product[];
+        const products = await airtable.getAll("plans") as Product[];
         return products.map(product => ({
           ...product,
-          // Ensure we have consistent data structure
-          size: Array.isArray(product.size) ? product.size : JSON.parse(product.size as string),
           price: typeof product.price === 'number' ? product.price : parseFloat(product.price as string),
-          // Use the ID field from Airtable instead of the record ID
-          id: product.id || product.fields?.id // Fallback to fields.id if needed
         }));
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -41,8 +42,8 @@ const Index = () => {
       <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <header className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Owl Shoes</h1>
-            <p className="text-xl text-gray-600">Discover your perfect pair</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">{companyInfo.name}</h1>
+            <p className="text-xl text-gray-600">Discover your perfect {entityNamePlural}</p>
           </header>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -64,11 +65,23 @@ const Index = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 mb-2">{product.brand}</p>
-                  <p className="text-2xl font-bold text-gray-900">${product.price}</p>
-                  <div className="mt-2">
-                    <span className="text-sm text-gray-500">
-                      Available sizes: {product.size.join(", ")}
-                    </span>
+                  <p className="text-2xl font-bold text-gray-900">£{product.price}/mo</p>
+                  <div className="mt-2 space-y-1">
+                    {product.speed && (
+                      <span className="text-sm text-gray-500 block">
+                        Speed: {product.speed}
+                      </span>
+                    )}
+                    {product.data_allowance && (
+                      <span className="text-sm text-gray-500 block">
+                        Data: {product.data_allowance}
+                      </span>
+                    )}
+                    {product.contract_months && (
+                      <span className="text-sm text-gray-500 block">
+                        Contract: {product.contract_months} months
+                      </span>
+                    )}
                   </div>
                 </CardContent>
               </Card>

@@ -19,8 +19,11 @@ exports.handler = async function(context, event, callback) {
         const SEGMENT_TRACK_URL = "https://api.segment.io/v1/track";
         const SEGMENT_IDENTIFY_URL = "https://api.segment.io/v1/identify";
 
-        // Extract form and order data
-        const { formData, orderData } = event;
+        // Load industry configuration
+        const industryConfig = JSON.parse(context.INDUSTRY_CONFIG || '{}');
+
+        // Extract form, order data, and event trigger
+        const { formData, orderData, eventTrigger = 'order_placed' } = event;
 
         // Construct Identify payload
         const identifyPayload = {
@@ -44,15 +47,50 @@ exports.handler = async function(context, event, callback) {
 
         console.log("Identify event sent to Segment:", identifyPayload);
 
-        // Construct Track payload
+        // Find event configuration based on trigger
+        let eventConfig = null;
+        if (industryConfig.segment && industryConfig.segment.events) {
+            eventConfig = industryConfig.segment.events.find(e => e.trigger === eventTrigger);
+        }
+
+        // Fallback to default if no industry config
+        if (!eventConfig) {
+            eventConfig = {
+                name: "Order Placed",
+                properties: ["orderId", "totalAmount", "items"]
+            };
+        }
+
+        // Build dynamic properties based on event config
+        const eventProperties = {};
+        eventConfig.properties.forEach(prop => {
+            // Map common property names
+            const propMap = {
+                'order_id': orderData.order_id,
+                'total_amount': orderData.total_amount,
+                'product_id': orderData.items?.[0]?.id,
+                'category': orderData.items?.[0]?.category,
+                'brand': orderData.items?.[0]?.brand,
+                'speed': orderData.items?.[0]?.speed,
+                'data_allowance': orderData.items?.[0]?.data_allowance,
+                'contract_months': orderData.items?.[0]?.contract_months,
+                'plan_id': orderData.items?.[0]?.id,
+                // Legacy support
+                'orderId': orderData.order_id,
+                'totalAmount': orderData.total_amount,
+                'items': orderData.items
+            };
+
+            if (propMap[prop] !== undefined) {
+                eventProperties[prop] = propMap[prop];
+            }
+        });
+
+        // Construct Track payload with dynamic event name and properties
         const trackPayload = {
             userId: formData.email,
-            event: "Order Placed",
-            properties: {
-                orderId: orderData.order_id,
-                totalAmount: orderData.total_amount,
-                items: orderData.items
-            },
+            event: eventConfig.name,
+            properties: eventProperties,
         };
 
         // Send Track request to Segment

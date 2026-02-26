@@ -24,6 +24,19 @@ async function getEnvironmentVariables() {
     delete variables.FUNCTIONS_DOMAIN;
   }
 
+  // INDUSTRY_CONFIG is too large for Twilio Functions environment variables (>450 bytes)
+  // Functions use specific variables like AIRTABLE_BASE_ID instead
+  if (variables.INDUSTRY_CONFIG) {
+    delete variables.INDUSTRY_CONFIG;
+  }
+
+  // Remove VITE_ variables (only needed for web frontend, not Functions)
+  for (const key in variables) {
+    if (key.startsWith('VITE_')) {
+      delete variables[key];
+    }
+  }
+
   for (const key in variables) {
     if (!variables[key]) {
       delete variables[key];
@@ -40,9 +53,13 @@ async function getEnvironmentVariables() {
  */
 async function deployFunctions(serverlessClient) {
   serverlessClient.on('status-update', (evt) => {
-    process.stdout.clearLine();
-    process.stdout.cursorTo(0);
-    process.stdout.write(`  ${evt.message}`);
+    if (process.stdout.clearLine && process.stdout.cursorTo) {
+      process.stdout.clearLine();
+      process.stdout.cursorTo(0);
+      process.stdout.write(`  ${evt.message}`);
+    } else {
+      console.log(`  ${evt.message}`);
+    }
   });
 
   const result = await serverlessClient.deployLocalProject({

@@ -1,9 +1,33 @@
 > [!NOTE]
 > Twilio AI Assistants is a [Twilio Alpha](https://twilioalpha.com) project that is currently in Developer Preview.
 
-# Twilio AI Assistant Deployment Tool - Owl Shoes
+# Twilio AI Assistant Deployment Tool
 
-A modular tool for deploying a Twilio AI Assistant with pre-configured tools and knowledge bases. This project provides a structured way to create and configure an AI Assistant for retail customer service.
+A modular, **multi-industry** tool for deploying Twilio AI Assistants with pre-configured tools and knowledge bases. This project provides a structured, configuration-driven approach to create and customize AI Assistants for different industries (retail, telecommunications, banking, etc.) in minutes instead of days.
+
+## 🎯 Multi-Industry Support
+
+This demo now supports **rapid customization** for different industries through a configuration-driven architecture:
+
+- **Switch industries in 1-2 hours** (vs. 1-2 days of manual coding)
+- **Pre-configured examples**: Owl Shoes (retail) and Talk Talk (telecommunications)
+- **Single configuration file** per industry - no code changes needed
+- **Automatic generation** of prompts, functions, UI components, and types
+
+### Quick Start - Multi-Industry
+
+```bash
+# Build for retail (Owl Shoes)
+npm run build owl-shoes
+npm run deploy
+
+# Switch to telecommunications (Talk Talk)
+npm run build talk-talk
+npm run deploy
+```
+
+📖 **[Full Multi-Industry Documentation →](docs/MULTI_INDUSTRY_SETUP.md)**
+🚀 **[Quick Start Guide →](docs/QUICK_START.md)**
 
 ## Table of Contents
 - [Features](#features)
@@ -31,21 +55,29 @@ A modular tool for deploying a Twilio AI Assistant with pre-configured tools and
 
 ## Features
 
-- Automated assistant creation with retail-focused personality
-- Pre-configured tools for common retail operations:
+### Multi-Industry Capabilities
+- ✅ **Configuration-driven architecture** - Define industries in JSON, not code
+- ✅ **Automatic code generation** - Functions, prompts, types, and UI generated from config
+- ✅ **Industry-specific schemas** - Custom product attributes per industry
+- ✅ **Dynamic theming** - Automatic CSS generation from brand colors
+- ✅ **Flexible Segment events** - Custom analytics events per industry
+- ✅ **Template-based prompts** - Handlebars templates for AI personalities
+- ✅ **Type safety** - Auto-generated TypeScript types
+
+### AI Assistant Features
+- Automated assistant creation with industry-specific personality
+- Pre-configured tools for common operations:
   - Customer lookup
   - Order management
   - Returns processing
-  - Product recommendations
+  - Product/service recommendations
   - Customer surveys
+  - Custom industry-specific tools
 - Knowledge base integration for FAQs
-- Modular and maintainable codebase
-- Optional front-end integration for demo purposes
+- Multi-channel support (Voice, SMS, Chat, WhatsApp)
 - Optional Segment integration for analytics
-- Optional Chat Service integration for messaging
-- Optional Voice Intel integration for voice calls
-- Optional Flex integration for voice calls
-- Optional Studio integration for voice calls
+- Optional Flex integration for agent handoff
+- Optional Studio integration for complex workflows
 
 ## Prerequisites
 

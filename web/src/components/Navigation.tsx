@@ -7,10 +7,12 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
+import { getCompanyInfo } from "@/lib/industryConfig.generated";
 
 export function Navigation() {
   const navigate = useNavigate();
   const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
+  const companyInfo = getCompanyInfo();
 
   return (
     <div className="border-b">
@@ -20,7 +22,7 @@ export function Navigation() {
           className="mr-6 px-0 text-lg font-bold"
           onClick={() => navigate("/")}
         >
-          Owl Shoes
+          {companyInfo.name}
         </Button>
         <NavigationMenu className="hidden md:flex">
           <NavigationMenuList>

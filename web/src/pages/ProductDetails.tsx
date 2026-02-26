@@ -1,26 +1,22 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Navigation } from "@/components/Navigation";
 import { airtable } from "@/integrations/airtable/client";
-import type { Product } from "@/integrations/airtable/types";
+import type { Product } from "@/integrations/airtable/types.generated";
 
 const ProductDetails = () => {
   const { id } = useParams();
-  const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const { toast } = useToast();
 
   const { data: product, isLoading } = useQuery({
     queryKey: ["product", id],
     queryFn: async () => {
       try {
-        const product = await airtable.getById("Products", id as string) as Product;
+        const product = await airtable.getById("plans", id as string) as Product;
         return {
           ...product,
-          // Ensure consistent data structure
-          size: Array.isArray(product.size) ? product.size : JSON.parse(product.size as string),
           price: typeof product.price === 'number' ? product.price : parseFloat(product.price as string)
         };
       } catch (error) {
@@ -31,17 +27,9 @@ const ProductDetails = () => {
   });
 
   const addToCart = () => {
-    if (!selectedSize) {
-      toast({
-        title: "Please select a size",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
     const existingItemIndex = cartItems.findIndex(
-      (item: any) => item.id === product.id && item.size === selectedSize
+      (item: any) => item.id === product.id
     );
 
     if (existingItemIndex >= 0) {
@@ -52,7 +40,6 @@ const ProductDetails = () => {
         name: product.name,
         price: product.price,
         image_url: product.image_url,
-        size: selectedSize,
         quantity: 1,
       });
     }
@@ -60,7 +47,7 @@ const ProductDetails = () => {
     localStorage.setItem("cart", JSON.stringify(cartItems));
     toast({
       title: "Added to cart",
-      description: `${product.name} - Size ${selectedSize}`,
+      description: `${product.name} added to your cart`,
     });
   };
 
@@ -73,7 +60,7 @@ const ProductDetails = () => {
   }
 
   if (!product) {
-    return <div>Product not found</div>;
+    return <div>Plan not found</div>;
   }
 
   return (
@@ -91,21 +78,19 @@ const ProductDetails = () => {
           <div className="flex flex-col space-y-4">
             <h1 className="text-3xl font-bold">{product.name}</h1>
             <p className="text-gray-600">{product.brand}</p>
-            <p className="text-2xl font-bold">${product.price}</p>
+            <p className="text-2xl font-bold">£{product.price}/mo</p>
             <p className="text-gray-700">{product.description}</p>
-            <div>
-              <h3 className="font-semibold mb-2">Select Size</h3>
-              <div className="grid grid-cols-4 gap-2">
-                {product.size.map((size: number) => (
-                  <Button
-                    key={size}
-                    variant={selectedSize === size ? "default" : "outline"}
-                    onClick={() => setSelectedSize(size)}
-                  >
-                    {size}
-                  </Button>
-                ))}
-              </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold mb-2">Plan Details</h3>
+              {product.speed && (
+                <p className="text-gray-600">Speed: {product.speed}</p>
+              )}
+              {product.data_allowance && (
+                <p className="text-gray-600">Data: {product.data_allowance}</p>
+              )}
+              {product.contract_months && (
+                <p className="text-gray-600">Contract: {product.contract_months} months</p>
+              )}
             </div>
             <Button
               className="mt-8"

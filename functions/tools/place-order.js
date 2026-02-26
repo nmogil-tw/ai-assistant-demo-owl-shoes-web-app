@@ -1,9 +1,17 @@
 const Airtable = require('airtable');
 
+/**
+ * Place Order Function
+ *
+ * Generated for: Talk Talk
+ * Industry: telecommunications
+ * Entity: plan
+ */
+
 exports.handler = async function(context, event, callback) {
   const response = new Twilio.Response();
   response.appendHeader('Content-Type', 'application/json');
-  
+
   try {
     // Validate Airtable configuration
     if (!context.AIRTABLE_API_KEY || !context.AIRTABLE_BASE_ID) {
@@ -18,8 +26,8 @@ exports.handler = async function(context, event, callback) {
     const identityHeader = event.request.headers["x-identity"];
     if (!identityHeader) {
       response.setStatusCode(400);
-      response.setBody({ 
-        error: 'Missing x-identity header. Provide email or phone in the format: "email:<email>" or "phone:<phone>".' 
+      response.setBody({
+        error: 'Missing x-identity header. Provide email or phone in the format: "email:<email>" or "phone:<phone>".'
       });
       return callback(null, response);
     }
@@ -80,8 +88,8 @@ exports.handler = async function(context, event, callback) {
 
     const customer = customerRecords[0].fields;
 
-    // Lookup product
-    const productRecords = await base('products')
+    // Lookup plan
+    const productRecords = await base('plans')
       .select({
         filterByFormula: `{id} = '${product_id}'`,
         maxRecords: 1
@@ -90,7 +98,7 @@ exports.handler = async function(context, event, callback) {
 
     if (!productRecords || productRecords.length === 0) {
       response.setStatusCode(404);
-      response.setBody({ error: `No product found with id: ${product_id}` });
+      response.setBody({ error: `No plan found with id: ${product_id}` });
       return callback(null, response);
     }
 
@@ -108,23 +116,27 @@ exports.handler = async function(context, event, callback) {
     // Generate random 6-digit order ID
     const orderId = Math.floor(100000 + Math.random() * 900000).toString();
 
+    // Build order item with industry-specific fields
+    const orderItem = {
+      id: product.id,
+      name: product.name,
+      price: finalPrice,
+      quantity: 1,
+      image_url: product.image_url,
+      category: product.category,
+      brand: product.brand,
+      speed: product.speed,
+      data_allowance: product.data_allowance,
+      contract_months: product.contract_months
+    };
+
     // Create order record
     const orderData = {
       id: orderId,
       customer_id: customer.id,
       email: customer.email,
       phone: customer.phone,
-      items: JSON.stringify([{  // Airtable requires stringified JSON for complex objects
-        id: product.id,
-        name: product.name,
-        price: finalPrice,
-        quantity: 1,
-        image_url: product.image_url,
-        size: product.size,
-        color: product.color,
-        category: product.category,
-        brand: product.brand
-      }]),
+      items: JSON.stringify([orderItem]),  // Airtable requires stringified JSON for complex objects
       total_amount: finalPrice,
       shipping_status: 'pending'
     };
@@ -155,7 +167,7 @@ exports.handler = async function(context, event, callback) {
             zip_code: customer.zip_code
           }
         },
-        product: {
+        plan: {
           name: product.name,
           price: finalPrice,
           original_price: product.price,

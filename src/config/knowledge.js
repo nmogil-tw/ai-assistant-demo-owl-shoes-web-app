@@ -1,8 +1,8 @@
 module.exports = {
     faqs: {
-      name: "Frequently Asked Questions 2",
+      name: "Frequently Asked Questions",
       type: "Web",
-      description: "Use this to answer questions about things like return policies, shipping, support, payment.",
-      source: "https://www.onlineshoes.com/US/en/content?caid=faqs"
+      description: "Use this to answer questions about broadband plans, billing, coverage, technical support, and account management.",
+      source: "https://community.talktalk.co.uk/t5/Articles/ct-p/articles"
     }
   };

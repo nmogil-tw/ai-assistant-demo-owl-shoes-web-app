@@ -2,6 +2,7 @@ import { Navigation } from "@/components/Navigation";
 import { AssistantChat } from "@twilio-alpha/assistants-react";
 import { useEffect, useState } from "react";
 import { twilioApi } from "@/integrations/twilio";
+import { getCompanyInfo } from "@/lib/industryConfig.generated";
 
 const TWILIO_ASSISTANT_SID = import.meta.env.VITE_TWILIO_ASSISTANT_SID;
 const AI_ASSISTANT_PHONE_NUMBER = import.meta.env.VITE_AI_ASSISTANT_PHONE_NUMBER;
@@ -9,6 +10,7 @@ const AI_ASSISTANT_PHONE_NUMBER = import.meta.env.VITE_AI_ASSISTANT_PHONE_NUMBER
 const Contact = () => {
   const [token, setToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const companyInfo = getCompanyInfo();
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -79,12 +81,15 @@ const Contact = () => {
               
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">Email</h2>
-                <p className="text-gray-600">support@owlshoes.com</p>
+                <p className="text-gray-600">{companyInfo.email}</p>
               </div>
-              
+
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">Location</h2>
-                <p className="text-gray-600">123 Owl Street<br />San Francisco, CA 94105</p>
+                <p className="text-gray-600">
+                  {companyInfo.address.street}<br />
+                  {companyInfo.address.city}, {companyInfo.address.state} {companyInfo.address.zip}
+                </p>
               </div>
 
               {error ? (
