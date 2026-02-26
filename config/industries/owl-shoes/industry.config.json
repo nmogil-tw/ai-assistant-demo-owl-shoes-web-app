@@ -1,0 +1,58 @@
+{
+  "industry": {
+    "id": "owl-shoes",
+    "name": "Owl Shoes",
+    "type": "retail"
+  },
+  "company": {
+    "name": "Owl Shoes",
+    "email": "support@owlshoes.com",
+    "phone": "+1 (415) 555-0123",
+    "address": {
+      "street": "123 Owl Street",
+      "city": "San Francisco",
+      "state": "CA",
+      "zip": "94105"
+    }
+  },
+  "assistant": {
+    "name": "Shoe-bert",
+    "voice": "en-US-Neural2-A",
+    "promptTemplate": "prompts/assistant.hbs"
+  },
+  "products": {
+    "entityName": "product",
+    "entityNamePlural": "products",
+    "tableName": "products",
+    "categories": ["running", "casual", "formal", "athletic"],
+    "schema": {
+      "coreFields": ["id", "name", "price", "description", "image_url", "category", "brand"],
+      "industryFields": [
+        {"name": "size", "type": "string", "displayName": "Size"},
+        {"name": "color", "type": "string", "displayName": "Color"}
+      ],
+      "displayFields": ["name", "brand", "price", "size", "color"]
+    }
+  },
+  "tools": {
+    "enabled": ["customerLookup", "orderLookup", "products", "placeOrder", "createSurvey", "returnOrder"],
+    "customTools": []
+  },
+  "segment": {
+    "events": [
+      {
+        "name": "Order Placed",
+        "trigger": "order_placed",
+        "properties": ["product_id", "category", "brand", "size", "color", "total_amount"]
+      }
+    ]
+  },
+  "theme": {
+    "colors": {
+      "primary": "#8B4513",
+      "secondary": "#D2691E",
+      "accent": "#CD853F"
+    },
+    "logo": "assets/owl-shoes-logo.png"
+  }
+}

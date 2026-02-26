@@ -1,0 +1,248 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Industry Configuration Schema",
+  "description": "Schema for validating multi-industry Twilio AI Assistant configurations",
+  "type": "object",
+  "required": ["industry", "company", "assistant", "products", "tools", "segment", "theme"],
+  "properties": {
+    "industry": {
+      "type": "object",
+      "required": ["id", "name", "type"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Unique identifier for the industry (lowercase, hyphens allowed)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name for the industry"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["retail", "telecommunications", "healthcare", "banking", "hospitality", "other"],
+          "description": "Industry category"
+        }
+      }
+    },
+    "company": {
+      "type": "object",
+      "required": ["name", "email", "phone", "address"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Company name"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Customer support email"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Customer support phone number"
+        },
+        "address": {
+          "type": "object",
+          "required": ["street", "city", "state", "zip"],
+          "properties": {
+            "street": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "state": {
+              "type": "string"
+            },
+            "zip": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "assistant": {
+      "type": "object",
+      "required": ["name", "voice", "promptTemplate"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "AI Assistant's name"
+        },
+        "voice": {
+          "type": "string",
+          "description": "Twilio voice identifier"
+        },
+        "promptTemplate": {
+          "type": "string",
+          "description": "Path to Handlebars prompt template relative to industry directory"
+        }
+      }
+    },
+    "products": {
+      "type": "object",
+      "required": ["entityName", "entityNamePlural", "categories", "schema"],
+      "properties": {
+        "entityName": {
+          "type": "string",
+          "description": "Singular name for products (e.g., 'shoe', 'plan', 'account')"
+        },
+        "entityNamePlural": {
+          "type": "string",
+          "description": "Plural name for products"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of product categories"
+        },
+        "schema": {
+          "type": "object",
+          "required": ["coreFields", "industryFields", "displayFields"],
+          "properties": {
+            "coreFields": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Standard fields present in all industries"
+            },
+            "industryFields": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name", "type", "displayName"],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["string", "number", "boolean"]
+                  },
+                  "displayName": {
+                    "type": "string"
+                  }
+                }
+              },
+              "description": "Industry-specific fields"
+            },
+            "displayFields": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Fields to display in UI components"
+            }
+          }
+        }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of standard tools to enable"
+        },
+        "customTools": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "description", "method", "endpoint", "schema"],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string",
+                "enum": ["GET", "POST", "PUT", "DELETE"]
+              },
+              "endpoint": {
+                "type": "string"
+              },
+              "schema": {
+                "type": "object"
+              }
+            }
+          },
+          "description": "Custom industry-specific tools"
+        }
+      }
+    },
+    "segment": {
+      "type": "object",
+      "required": ["events"],
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "trigger", "properties"],
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Event name to send to Segment"
+              },
+              "trigger": {
+                "type": "string",
+                "description": "Application trigger that fires this event"
+              },
+              "properties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Properties to include in the event"
+              }
+            }
+          }
+        }
+      }
+    },
+    "theme": {
+      "type": "object",
+      "required": ["colors", "logo"],
+      "properties": {
+        "colors": {
+          "type": "object",
+          "required": ["primary", "secondary", "accent"],
+          "properties": {
+            "primary": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": "Primary brand color (hex)"
+            },
+            "secondary": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": "Secondary brand color (hex)"
+            },
+            "accent": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": "Accent color (hex)"
+            }
+          }
+        },
+        "logo": {
+          "type": "string",
+          "description": "Path to logo file relative to industry theme directory"
+        }
+      }
+    }
+  }
+}
